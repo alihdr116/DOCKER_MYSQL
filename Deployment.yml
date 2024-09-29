@@ -27,14 +27,13 @@ spec:
         ports:
         - containerPort: 3306
         volumeMounts:
-        - name: mysql-data
-          mountPath: /var/lib/mysql
-
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
       - name: server
         image: alihdr116/single-crud-nodejs-mysql-server
         env:
         - name: DB_HOST
-          value: "localhost"  # Use localhost since they are in the same pod
+          value: "mysql"
         - name: DB_USER
           value: "ali"
         - name: DB_PASSWORD
@@ -43,12 +42,11 @@ spec:
           value: "crudmysql"
         ports:
         - containerPort: 8001
-
       - name: client
         image: alihdr116/single-crud-nodejs-mysql-client
         ports:
         - containerPort: 3000
-
       volumes:
-      - name: mysql-data
-        emptyDir: {}  # Or use a persistent volume if needed
+      - name: mysql-initdb
+        hostPath:
+          path: /initdb/init.sql  # Adjust this path as needed
