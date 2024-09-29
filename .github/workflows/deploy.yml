@@ -25,11 +25,11 @@ jobs:
     - name: Build and push Docker images
       run: |
         # Build the Docker images
-        docker build -t alihdr116/single-crud-nodejs-mysql-client ./client
-        docker build -t alihdr116/single-crud-nodejs-mysql-server ./server
+        docker build -t iamalihdr116/single-crud-nodejs-mysql-client ./client
+        docker build -t iamalihdr116/single-crud-nodejs-mysql-server ./server
         # Push the images to Docker Hub
-        docker push alihdr116/single-crud-nodejs-mysql-client
-        docker push alihdr116/single-crud-nodejs-mysql-server
+        docker push iamalihdr116/single-crud-nodejs-mysql-client
+        docker push iamalihdr116/single-crud-nodejs-mysql-server
 
     - name: Set up Minikube
       run: |
