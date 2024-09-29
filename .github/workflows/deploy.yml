@@ -3,7 +3,7 @@ name: Deploy to Minikube
 on:
   push:
     branches:
-      - main # Change this to your default branch
+      - main  # Change this to your default branch if needed
 
 jobs:
   deploy:
@@ -24,12 +24,14 @@ jobs:
 
     - name: Build and push Docker images
       run: |
+        # Build the Docker images
         docker build -t alihdr116/single-crud-nodejs-mysql-client ./client
         docker build -t alihdr116/single-crud-nodejs-mysql-server ./server
-        docker build -t alihdr116/mysql:latest .
+        # Use the official MySQL image, no need to build since it is pulled from Docker Hub
+        # Just make sure to tag correctly if you're using a specific version
+        # docker pull mysql:8.0  # Optional, for clarity
         docker push alihdr116/single-crud-nodejs-mysql-client
         docker push alihdr116/single-crud-nodejs-mysql-server
-        docker push alihdr116/mysql:latest
 
     - name: Set up Minikube
       run: |
@@ -42,12 +44,39 @@ jobs:
 
     - name: Deploy to Minikube
       run: |
-        kubectl apply -f k8s/mysql-deployment.yaml
-        kubectl apply -f k8s/server-deployment.yaml
-        kubectl apply -f k8s/client-deployment.yaml
-
-    - name: Wait for deployments to be ready
-      run: |
-        kubectl rollout status deployment/mysql
-        kubectl rollout status deployment/server
-        kubectl rollout status deployment/client
+        # Create Kubernetes YAML files based on Docker Compose setup
+        cat <<EOF > k8s/mysql-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: MYSQL_DATABASE
+          value: "crudmysql"
+        - name: MYSQL_USER
+          value: "ali"
+        - name: MYSQL_PASSWORD
+          value: "root"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        emptyDir: {}
