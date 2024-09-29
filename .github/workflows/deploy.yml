@@ -27,9 +27,7 @@ jobs:
         # Build the Docker images
         docker build -t alihdr116/single-crud-nodejs-mysql-client ./client
         docker build -t alihdr116/single-crud-nodejs-mysql-server ./server
-        # Use the official MySQL image, no need to build since it is pulled from Docker Hub
-        # Just make sure to tag correctly if you're using a specific version
-        # docker pull mysql:8.0  # Optional, for clarity
+        # Push the images to Docker Hub
         docker push alihdr116/single-crud-nodejs-mysql-client
         docker push alihdr116/single-crud-nodejs-mysql-server
 
@@ -44,39 +42,16 @@ jobs:
 
     - name: Deploy to Minikube
       run: |
-        # Create Kubernetes YAML files based on Docker Compose setup
-        cat <<EOF > k8s/mysql-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - name: mysql
-        image: mysql:8.0
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: "root"
-        - name: MYSQL_DATABASE
-          value: "crudmysql"
-        - name: MYSQL_USER
-          value: "ali"
-        - name: MYSQL_PASSWORD
-          value: "root"
-        ports:
-        - containerPort: 3306
-        volumeMounts:
-        - name: mysql-data
-          mountPath: /var/lib/mysql
-      volumes:
-      - name: mysql-data
-        emptyDir: {}
+        # Apply the deployment and service configurations
+        kubectl apply -f k8s/my-app-deployment.yaml
+        kubectl apply -f k8s/services.yaml
+
+    - name: Wait for deployments to be ready
+      run: |
+        kubectl rollout status deployment/my-app
+
+    - name: Expose Services
+      run: |
+        # Expose the Node.js server and React client services
+        minikube service server-service --url
+        minikube service client-service --url
