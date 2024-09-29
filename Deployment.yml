@@ -48,5 +48,5 @@ spec:
         - containerPort: 3000
       volumes:
       - name: mysql-initdb
-        hostPath:
-          path: /initdb/init.sql  # Adjust this path as needed
+        configMap:
+          name: mysql-initdb-configmap
