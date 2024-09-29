@@ -43,8 +43,8 @@ jobs:
     - name: Deploy to Minikube
       run: |
         # Apply the deployment and service configurations
-        kubectl apply -f k8s/my-app-deployment.yaml
-        kubectl apply -f k8s/services.yaml
+        kubectl apply -f k8s/Deployment.yml
+        kubectl apply -f Service.yml
 
     - name: Wait for deployments to be ready
       run: |
